@@ -6,3 +6,4 @@ protected/data/*.db
 themes/classic/views/
 /deposito_central/runtime
 /farmacia/runtime
+/deposito_central/web/assets
