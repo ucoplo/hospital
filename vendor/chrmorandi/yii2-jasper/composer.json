@@ -1,0 +1,29 @@
+{
+    "name": "chrmorandi/yii2-jasper",
+    "type": "yii2-extension",
+    "description": "Create Reports in PHP with JasperReports",
+    "license": "MIT",
+    "keywords": ["reports","jasper","jasperreports","java","php","yii2", "yiiframework", "ireport"],
+    "homepage": "https://github.com/chrmorandi/yii2-jasper",
+    "authors": [
+        {
+            "name": "Christopher M. Mota",
+            "email": "chrmorandi@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "yiisoft/yii2": "*"
+    },
+    "require-dev": {
+        "codeception/codeception": "*",
+        "yiisoft/yii2-codeception": "*",
+        "yiisoft/yii2-coding-standards": "*"
+    },
+    "autoload": {
+        "psr-4": { 
+            "chrmorandi\\jasper\\": "src/Jasper/" 
+        }
+    }
+}
