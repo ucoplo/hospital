@@ -63,7 +63,7 @@ class Remito_adquisicion_renglones extends \yii\db\ActiveRecord
             [['AR_FECVTO'], 'safe'],
             [['AR_DEPOSITO'], 'string', 'max' => 2],
             [['AR_CODART'], 'string', 'max' => 4],
-            [['AR_CODART'], 'exist', 'skipOnError' => true, 'targetClass' => ArticGral::className(), 'targetAttribute' => ['AR_CODART' => 'AG_CODIGO']],
+            [['AR_CODART'], 'exist', 'skipOnError' => true, 'targetClass' => ArticGral::className(), 'targetAttribute' => ['AR_CODART' => 'AG_CODIGO','AR_DEPOSITO' => 'AG_DEPOSITO']],
             [['AR_DEPOSITO'], 'exist', 'skipOnError' => true, 'targetClass' => Deposito::className(), 'targetAttribute' => ['AR_DEPOSITO' => 'DE_CODIGO']],
             [['AR_RENUM'], 'exist', 'skipOnError' => true, 'targetClass' => Remito_adquisicion::className(), 'targetAttribute' => ['AR_RENUM' => 'RA_NUM']],
         ];
@@ -88,15 +88,15 @@ class Remito_adquisicion_renglones extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getMonodroga()
+    public function getArticulo()
     {
-        return $this->hasOne(ArticGral::className(), ['AG_CODIGO' => 'AR_CODART']);
+        return $this->hasOne(ArticGral::className(), ['AG_CODIGO' => 'AR_CODART','AG_DEPOSITO' => 'AR_DEPOSITO']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getRMDEPOSITO()
+    public function getDeposito()
     {
         return $this->hasOne(Deposito::className(), ['DE_CODIGO' => 'AR_DEPOSITO']);
     }
@@ -107,6 +107,12 @@ class Remito_adquisicion_renglones extends \yii\db\ActiveRecord
     public function getRemito()
     {
         return $this->hasOne(Remito_adquisicion::className(), ['RA_NUM' => 'AR_RENUM']);
+    }
+
+    public function getOrden_compra()
+    {
+        return $this->hasOne(OrdenCompra::className(), ['OC_NRO' => 'RA_OCNRO'])
+                        ->via('remito');
     }
 
      public static function getListaMonodrogas()

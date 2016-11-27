@@ -57,7 +57,7 @@ $this->title = str_pad($model->DE_NRODEVOL, 6, '0', STR_PAD_LEFT);
 
                 [
                     'attribute' => 'descripcion',
-                    'value' =>    function($model){return  $model->monod->AG_NOMBRE;},     
+                    'value' =>    function($model){return  $model->articulo->AG_NOMBRE;},     
                     'label' => 'Descripción del medicamento',
                 ],   
                 'PR_FECVTO:date', 

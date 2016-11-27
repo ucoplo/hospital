@@ -251,7 +251,7 @@ class Planilla_entrega extends \yii\db\ActiveRecord
      */
     public function getPedidoInsumo()
     {
-        return $this->hasOne(PedidoInsumos::className(), ['VD_NUMVALE' => 'PE_NUMVALE']);
+        return $this->hasOne(PedidosReposicionFarmacia::className(), ['PE_NROPED' => 'PE_NUMVALE']);
     }
 
     /**

@@ -66,7 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 [
                     'attribute' => 'descripcion',
-                    'value' =>    function($model){return   $model->monodroga->AG_NOMBRE;},     
+                    'value' =>    function($model){return   $model->articulo->AG_NOMBRE;},     
                     'label' => 'Descripción del medicamento',
                      'contentOptions' => ['style' => 'width:500px;'],
                 ],   

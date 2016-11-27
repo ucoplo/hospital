@@ -28,7 +28,7 @@ function cargar_vencimientos(elem){
                 select_Vencimientos.prop("selectedIndex", 0);
                 descripcion.parent().find('.help-block-error').remove();
             }else{
-                if (codart.length>0 && deposito.length>0){
+                if (codart!=null && codart.length>0 && deposito.length>0){
                     select_Vencimientos.html(data);
                     select_Vencimientos.prop("selectedIndex", -1);
                     descripcion.parent().find('.help-block-error').remove();
@@ -41,4 +41,19 @@ function cargar_vencimientos(elem){
         },
   
     });
+}
+
+function codigo_unico(seleccion){
+  codart = seleccion.val();
+  codart_id = seleccion.attr('id');
+  unico = true;
+  $('.list-cell__DR_CODART select').each(function( index, elem ){
+      
+      if ($(elem).attr('id')!=codart_id && codart==$(elem).val()){
+          unico=false;
+      }
+  });
+
+  return unico;
+
 }

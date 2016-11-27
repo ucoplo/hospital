@@ -30,10 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <h3 class="text-center"><?= Html::encode($this->title) ?></h3>
     
-     <p>
-        <?= Html::a('Planilla sin Pedido', ['create_sin_pedido'], ['class' => 'btn btn-success']) ?>
-    </p>
-    
+         
 <?php Pjax::begin(['id'=>'pjax_servicios']); ?>    <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'id' => "vales_servicios",
@@ -70,7 +67,6 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]); ?>
 <?php Pjax::end(); ?>
-
 
 
 </div>

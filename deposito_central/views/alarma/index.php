@@ -25,8 +25,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             [
-                'attribute' => 'monodroga.AG_NOMBRE',
-                'label' => 'Medicamento',
+                'attribute' => 'articulo.AG_NOMBRE',
+                'label' => 'Artículo',
             ],
             [
                 'attribute' => 'deposito.DE_DESCR',

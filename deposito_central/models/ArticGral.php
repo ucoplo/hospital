@@ -94,6 +94,7 @@ use yii\helpers\ArrayHelper;
  */
 class ArticGral extends \yii\db\ActiveRecord
 {
+    public $clasifica,$dias_salida;
     /**
      * @inheritdoc
      */

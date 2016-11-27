@@ -6,11 +6,14 @@
     }).on('afterAddRow', function(e) {
         
         row = $('.multiple-input-list__item:last');
-
         
         select = row.find('select');
         select.removeAttr('disabled');
-       
+
+        $( '.list-cell__PE_CANTPED input' ).change(function() {
+           $('#pedido_adquisicion-pe_costo').val(calcular_costo());
+        });
+             
 
         console.log('calls on after add row event');
     }).on('beforeDeleteRow', function(e, row){
@@ -18,7 +21,7 @@
         console.log('calls on before remove row event.');
 
     }).on('afterDeleteRow', function(){
-        console.log('calls on after remove row event');
+        $('#pedido_adquisicion-pe_costo').val(calcular_costo());
     });
 
     // $("#pedido_adquisicion-pe_artdes").select2({
@@ -37,9 +40,24 @@
     //   }
     // });
 
+    $( '.list-cell__PE_CANTPED input' ).change(function() {
+       $('#pedido_adquisicion-pe_costo').val(calcular_costo());
+    });
 
 
 });
+
+function calcular_costo(){
+  costo = 0;
+  $('.multiple-input-list__item').each(function( index, elem ){
+      
+      costo = costo + ($(elem).find('.list-cell__precio input').val()*$(elem).find('.list-cell__PE_CANTPED input').val());
+          
+  });
+
+  return costo;
+
+}
 
 function codigo_unico(seleccion){
   codart = seleccion.val();

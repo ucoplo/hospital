@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DetailView::widget([
         'model' => $model,
         'attributes' => [
-            'monodroga.AG_NOMBRE',
+            'articulo.AG_NOMBRE',
             'deposito.DE_DESCR',
             'AL_MIN',
             'AL_MAX',

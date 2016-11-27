@@ -74,7 +74,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 [
                     'attribute' => 'descripcion',
-                    'value' =>    function($renglon){return  $renglon->monod->AG_NOMBRE;},     
+                    'value' =>    function($renglon){return  $renglon->articulo->AG_NOMBRE;},     
                     'label' => 'Descripción del medicamento',
                 ],   
                 'PR_FECVTO:date', 

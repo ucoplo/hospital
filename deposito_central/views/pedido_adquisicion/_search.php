@@ -37,8 +37,6 @@ use yii\widgets\ActiveForm;
 
     <?php // echo $form->field($model, 'PE_CLASES') ?>
 
-    <?php // echo $form->field($model, 'PE_TIPO') ?>
-
     <?php // echo $form->field($model, 'PE_EXISACT') ?>
 
     <?php // echo $form->field($model, 'PE_PEDPEND') ?>

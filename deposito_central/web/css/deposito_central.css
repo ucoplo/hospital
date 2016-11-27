@@ -12,7 +12,7 @@ body {
 }
 
 .wrap > .container {
-    padding: 70px 15px 20px;
+    padding: 20px 15px 20px;
 }
 
 .footer {
@@ -410,4 +410,12 @@ table th {
 
 tr.row_readonly td.list-cell__button {
  display: none;
+}
+
+table.detail-view th {
+    width: 25%;
+}
+
+table.detail-view td {
+    width: 75%;
 }

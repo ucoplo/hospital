@@ -56,7 +56,7 @@ $this->title = $model->RA_NUM.' - '.$model->RA_CONCEP;
                 'AR_CODART',
                 [
                     'attribute' => 'descripcion',
-                    'value' =>    function($model){return   $model->monodroga->AG_NOMBRE;},     
+                    'value' =>    function($model){return   $model->articulo->AG_NOMBRE;},     
                     'label' => 'Descripción del medicamento',
                     'contentOptions' => ['style' => 'width:400px;'],
                 ],   

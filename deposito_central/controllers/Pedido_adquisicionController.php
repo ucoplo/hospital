@@ -7,6 +7,7 @@ use deposito_central\models\Pedido_adquisicion;
 use deposito_central\models\Pedido_adquisicion_renglones;
 use deposito_central\models\Pedido_adquisicionSearch;
 use deposito_central\models\ArticGral;
+use deposito_central\models\Clases;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\base\ErrorException;
@@ -87,47 +88,79 @@ class Pedido_adquisicionController extends Controller
      */
     public function actionCreate()
     {
-        $model = new Pedido_adquisicion();
+        
+        $search = new Pedido_adquisicionSearch();
 
-        if ($model->load(Yii::$app->request->post())) {
+        if ($search->load(Yii::$app->request->post())) {
+            $search->load(Yii::$app->request->post());
+            if ($search->validate()){
+                $model = new Pedido_adquisicion();
 
-             $rows = (new \yii\db\Query())
-                ->select([' max(PE_NUM) + 1 as next_id'])
-                ->from('ped_adq')
-                ->one();
-            if (isset($rows) && isset($rows['next_id'])){
+                $model->PE_DEPOSITO = $search->PE_DEPOSITO;
+                $model->PE_REFERENCIA = $search->PE_REFERENCIA;
+                $model->PE_ARTDES = $search->PE_ARTDES;
+                $model->PE_ARTHAS = $search->PE_ARTHAS;
+                $model->PE_CLASES = $search->PE_CLASES;
+                $model->PE_ACTIVOS = $search->PE_ACTIVOS;
+                $model->PE_INACTIVOS = $search->PE_INACTIVOS;
+                $model->PE_EXISACT = $search->PE_EXISACT;
+                $model->PE_PEDPEND = $search->PE_PEDPEND;
+                $model->PE_PONDHIS = $search->PE_PONDHIS;
+                $model->PE_PONDPUN = $search->PE_PONDPUN;
+                $model->PE_DIASABC = $search->PE_DIASABC;
+                $model->PE_DIASPREVIS = $search->PE_DIASPREVIS;
+                $model->PE_DIASDEMORA = $search->PE_DIASDEMORA;
+                $model->CLASE_A = $search->CLASE_A;
+                $model->CLASE_B = $search->CLASE_B;
+                $model->CLASE_C = $search->CLASE_C;
+
+                $rows = (new \yii\db\Query())
+                    ->select([' max(PE_NUM) + 1 as next_id'])
+                    ->from('ped_adq')
+                    ->one();
+                if (isset($rows) && isset($rows['next_id'])){
+                   
+                    $model->PE_NUM=$rows['next_id'];
+                }
+                else{
+                    $model->PE_NUM=1;
+                }
+
+                $model->PE_FECHA=date('Y-m-d');
+                $model->PE_HORA=date('H:i');
+                $model->PE_COSTO=0;
+                $model->PE_CLASABC = '';
+                $model->PE_CLASABC .= ($search->CLASE_A)?'A':'';
+                $model->PE_CLASABC .= ($search->CLASE_B)?'B':'';
+                $model->PE_CLASABC .= ($search->CLASE_C)?'C':'';
+                
+                $this->generar_renglones($model);
                
-                $model->PE_NUM=$rows['next_id'];
+                return $this->render('generar_pedido', [
+                    'model' => $model,
+                ]);
             }
             else{
-                $model->PE_NUM=1;
+                
+                return $this->render('create', [
+                    'model' => $search,
+                ]);                
             }
-
-            $model->PE_FECHA=date('Y-m-d');
-            $model->PE_HORA=date('H:i');
-
-            //$model->PE_CLASES = implode(",",$model->PE_CLASES);
-
-            $this->generar_renglones($model);
-           
-            return $this->render('generar_pedido', [
-                'model' => $model,
-            ]);
         } else {
-            $model->PE_DEPOSITO = Yii::$app->params['depositos_central'][0];
-            $model->PE_TIPO = 1;
-            $model->PE_EXISACT = 1;
-            $model->PE_PEDPEND = 1;
-            $model->PE_PONDHIS = 30;
-            $model->PE_PONDPUN = 70;
-            $model->PE_CLASABC = 0;
-            $model->PE_DIASABC = 90;
-            $model->PE_DIASPREVIS = 90;
-            $model->PE_DIASDEMORA = 30;
+            $search->PE_DEPOSITO = Yii::$app->params['depositos_central'][0];
+            $search->PE_ACTIVOS = 1;
+            $search->PE_INACTIVOS = 1;
+            $search->PE_EXISACT = 1;
+            $search->PE_PEDPEND = 1;
+            $search->PE_PONDHIS = 30;
+            $search->PE_PONDPUN = 70;
+            $search->PE_DIASABC = 90;
+            $search->PE_DIASPREVIS = 90;
+            $search->PE_DIASDEMORA = 30;
            
 
             return $this->render('create', [
-                'model' => $model,
+                'model' => $search,
             ]);
         }
     }
@@ -176,22 +209,20 @@ class Pedido_adquisicionController extends Controller
     {
         $model = new Pedido_adquisicion();
         //$model->scenario = 'create';
-        
+
         if ($model->load(Yii::$app->request->post())) {
-                        
+
             if ($model->validate() ){   
                 $connection = \Yii::$app->db;
                 $transaction = $connection->beginTransaction();
 
                 try {
-                    //Se guarda encabezado de la PLanilla
-                     //$model->PE_PROCESADO = 0;
+                    //Se guarda encabezado del Pedido
+
                     if (isset($model->PE_CLASES) && !empty($model->PE_CLASES)){
                         $model->PE_CLASES = implode(",",$model->PE_CLASES);
                     }
-
-                     
-                     if ($model->save()){
+                    if ($model->save()){
                         $this->guardar_renglones($model);
                                                 
                       }else{
@@ -212,20 +243,20 @@ class Pedido_adquisicionController extends Controller
                     $transaction->rollBack();
                     
                     Yii::$app->getSession()->setFlash('error_deposito_central', $e->getMessage());
-                    print_r($e->getMessage());
+                    
                     return $this->render('generar_pedido', [
                     'model' => $model,
                     ]);
                 }
             } else {
-                print_r("1");
+                
                 return $this->render('generar_pedido', [
                 'model' => $model,
                 ]);
             }
             
         } else {
-            print_r("2");
+            
             return $this->render('generar_pedido', [
                 'model' => $model,
             ]);
@@ -275,13 +306,14 @@ class Pedido_adquisicionController extends Controller
     {
         if (($model = Pedido_adquisicion::findOne($id)) !== null) {
             
-             
-            // $clases = explode(",",$model->PE_CLASE);
-            // $model->PE_CLASE = "";
-            // foreach ($clases as $key => $value) {
-            //    $model->PE_CLASE .= Clases::findOne($value)->CL_NOM;
-            // }
-
+            if (isset($model->PE_CLASES) && !empty($model->PE_CLASES)){ 
+                $clases = explode(",",$model->PE_CLASES);
+                $model->PE_CLASES = "";
+               
+                foreach ($clases as $key => $value) {
+                   $model->PE_CLASES .= Clases::findOne($value)->CL_NOM.', ';
+                }
+            }
             $searchModel = new Pedido_adquisicion_renglones();
             $model->renglones =  $searchModel->get_renglones($model->PE_NUM);
 
@@ -296,8 +328,14 @@ class Pedido_adquisicionController extends Controller
 
         $query->where(['AG_DEPOSITO'=>$model->PE_DEPOSITO]);
 
-        if (isset($model->PE_TIPO) && $model->PE_TIPO) {
-            $query->andFilterWhere(['AG_ACTIVO'=>'T']);
+        if (isset($model->PE_ACTIVOS) && $model->PE_ACTIVOS) {
+            if (isset($model->PE_INACTIVOS) && !$model->PE_INACTIVOS) {
+                $query->andFilterWhere(['AG_ACTIVO'=>'T']);
+            }
+        }else{
+            if (isset($model->PE_INACTIVOS) && $model->PE_INACTIVOS) {
+                $query->andFilterWhere(['AG_ACTIVO'=>'F']);
+            }
         }
 
         $query->andFilterWhere(['IN', 'AG_CODCLA', $model->PE_CLASES]);
@@ -305,15 +343,53 @@ class Pedido_adquisicionController extends Controller
         if (isset($model->PE_ARTDES) && $model->PE_ARTDES!='') {
             $codigo_numero = intval($model->PE_ARTDES);
             $query->andFilterWhere(['>=', '(`AG_CODIGO` * 1)', $codigo_numero]);
-         }
+        }
 
         if (isset($model->PE_ARTHAS) && $model->PE_ARTHAS!='') {
              $codigo_numero = intval($model->PE_ARTHAS);
              $query->andFilterWhere(['<=', '(`AG_CODIGO` * 1)', $codigo_numero]);
-         }
+        }
 
+        if ($model->CLASE_A || $model->CLASE_B || $model->CLASE_C){
+
+            $movs = $model->abc();
+
+            $total_consumo = 0;
+            $articulos_abc = array();
+
+            foreach ($movs as $key => $mov) {
+                $total_consumo += $mov->consumo_valor;
+            }
+            $porc_acumulado = 0;
+            foreach ($movs as $key => $mov) {
+                
+                $mov->porc_abc = ($mov->consumo_valor*100)/$total_consumo;
+
+                $porc_acumulado += $mov->porc_abc;
+                $mov->porc_abc = $porc_acumulado;
+                //echo $mov->DM_CODART.'-'.$mov->consumo_valor.'--'.$porc_acumulado;echo "<br>"; 
+
+                if ($porc_acumulado>=95){
+                    if ($model->CLASE_C){
+                        $articulos_abc[] = $mov->DM_CODART;
+                    }
+                }elseif ($porc_acumulado>=80) {
+                    if ($model->CLASE_B){
+                        $articulos_abc[] = $mov->DM_CODART;
+                    }
+                }elseif ($model->CLASE_A){
+                        $articulos_abc[] = $mov->DM_CODART;
+                }
+            }
+            
+            if (count($articulos_abc)==0){
+                $articulos_abc = ['articulo_vacio'];
+            }
+
+            $query->andFilterWhere(['IN', 'AG_CODIGO',  $articulos_abc]);
+
+        }
         return $query->all();
-
     }
 
 
@@ -358,7 +434,7 @@ class Pedido_adquisicionController extends Controller
             //cantidad sugerida articulo redondeado hacia arriba
             $cant_artic =  ceil($ESi - $EEi);
 
-            // if ($cant_artic>0){
+            if ($cant_artic>0){
                 $renglon = new Pedido_adquisicion_renglones();
                 $renglon->PE_CODART = $articulo->AG_CODIGO;
                 $renglon->PE_DEPOSITO = $articulo->AG_DEPOSITO;
@@ -376,7 +452,7 @@ class Pedido_adquisicionController extends Controller
                 $renglones[] = $renglon;
 
                 $costo_total +=  ($articulo->AG_PRECIO*$cant_artic);
-            // }
+            }
         }
 
         $model->renglones = $renglones;

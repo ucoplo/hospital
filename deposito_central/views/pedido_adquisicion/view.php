@@ -22,17 +22,34 @@ $this->params['breadcrumbs'][] = $this->title;
             'PE_NUM',
             'PE_FECHA:date',
             'PE_HORA',
-            'PE_COSTO',
+            [
+                'class' =>  yii\grid\DataColumn::className(), // this line is optional
+                'attribute' => 'PE_DEPOSITO',
+                'format' => 'text',
+                'value' => Yii::$app->formatter->asCurrency($model->PE_COSTO),
+            ],
             'PE_REFERENCIA:ntext',
-            'PE_NROEXP',
-            'PE_FECADJ',
-            'PE_DEPOSITO',
+            [
+                'class' =>  yii\grid\DataColumn::className(), // this line is optional
+                'attribute' => 'PE_DEPOSITO',
+                'format' => 'text',
+                'value' => $model->deposito->DE_DESCR,
+            ],
             'PE_ARTDES',
             'PE_ARTHAS',
             'PE_CLASES',
-            'PE_TIPO',
-            'PE_EXISACT',
-            'PE_PEDPEND',
+            [
+                'class' =>  yii\grid\DataColumn::className(), // this line is optional
+                'attribute' => 'PE_EXISACT',
+                'format' => 'text',
+                'value' => ($model->PE_EXISACT)?'Si':'No',
+            ],
+            [
+                'class' =>  yii\grid\DataColumn::className(), // this line is optional
+                'attribute' => 'PE_PEDPEND',
+                'format' => 'text',
+                'value' => ($model->PE_EXISACT)?'Si':'No',
+            ],
             'PE_PONDHIS',
             'PE_PONDPUN',
             'PE_CLASABC',

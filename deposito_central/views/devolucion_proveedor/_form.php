@@ -56,18 +56,31 @@ Devolucion_ProveedorAsset::register($this);
 
         <div class="row">
             <div class="col-md-6">
-
-               
-                <?= $form->field($model, 'DD_PROVE')->widget(Select2::classname(), [
-                    'data' =>  ArrayHelper::map(Proveedores::find()->all(), 'PR_CODIGO', 
-                                        function($model, $defaultValue) {
-                                            return $model['PR_CODIGO'].'-'.$model['PR_RAZONSOC'];
-                                        }),
+                <?php  $url_busqueda_proveedores = \yii\helpers\Url::to(['reportes/buscar-proveedores']);
+                ?>
+                 <?= $form->field($model, 'DD_PROVE')->widget(Select2::classname(), [
                     'options' => ['placeholder' => 'Seleccione Proveedor ...'],
+
                     'pluginOptions' => [
-                        'allowClear' => true
+                        'ajax' => [
+                            'url' => $url_busqueda_proveedores,
+                            'dataType' => 'json',
+                            'data' => new JsExpression('function(params) {
+                              return {q:params.term};
+                            }')
+                        ],
+                        'allowClear' => true,
+                        'enableEmpty' => true,
+                        'minimumInputLength' => 1,
+                        'language' => 'es',
+                        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                        'templateResult' => new JsExpression('function(articulo) { return articulo.text; }'),
+                        'templateSelection' => new JsExpression('function (articulo) { return articulo.text; }'),
                     ],
+                 
                 ]);?>
+               
+               
             </div>
 
         </div>    
@@ -88,23 +101,55 @@ Devolucion_ProveedorAsset::register($this);
                     
                     'title' => 'Cod. Medicamento',
                     'type' => kartik\select2\Select2::classname(),
-                    'options' => [
-                        'data' => ArrayHelper::map(ArticGral::find()->all(), 'AG_CODIGO', 
-                                        function($model, $defaultValue) {
-                                            return $model['AG_CODIGO'].'-'.$model['AG_NOMBRE'];
-                                        }),
-                        'options' => ['placeholder' => ''],
-                        'pluginOptions' => [
-                            'allowClear' => false,
-                            'templateSelection' => new JsExpression('function(monodroga) { return monodroga.text.substring(0,4); }'),
-                        ],
-                        'pluginEvents' => [
-                            "select2:select" => "function(name) { descripcion = name.params.data.text.substring(5); 
-                                                                  $(this).closest('td').next().find('input').val(descripcion);
-                                                                    cargar_vencimientos($(this));}",
-                        ],
-                    ]
+                    'options' => function($data) use ($model){
+                        $url_busqueda_articulos = \yii\helpers\Url::to(['remito_adquisicion/buscar-articulos']);
+                        return 
+                        [
+                            //'data' => (!empty($data['AR_CODART']))?[ "{$data['AR_CODART']}" => "[{$data['AR_CODART']}] ".$data['descripcion']]:[],
+                            'pluginOptions' => [
+                                'allowClear' => false,
+                                'templateSelection' => new JsExpression('function(monodroga) { return monodroga.text.substring(0,4); }'),
+                                'ajax' => [
+                                    'url' => $url_busqueda_articulos,
+                                    'dataType' => 'json',
+                                    'data' => new JsExpression('function(params) {
+                                            deposito_id = 0;
+                                            deposito_id = $("#devolucion_proveedor-dd_deposito").val();
+                                            if (deposito_id==0) {
+                                                krajeeDialog.alert("Debe seleccionar primero el depósito");
+                                                return false;
+                                            }else{
+                                                return {q:params.term,deposito:deposito_id};
+                                            }
+                                    }')
+                                ],
+                                
+                                'enableEmpty' => true,
+                                'minimumInputLength' => 1,
+                                'language' => 'es',
+                                'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                                'templateResult' => new JsExpression('function(articulo) { return articulo.text; }'),
+                                'templateSelection' => new JsExpression('function (articulo) { return articulo.id; }'),
+                            ],
+                            'pluginEvents' => [
 
+                                "select2:select" => "function(result) {
+                                    
+                                    if (!codigo_unico($(this)))
+                                    {
+                                        $(this).val('').trigger('change');
+                                        krajeeDialog.alert('No puede repetirse el artículo');
+                                    }
+                                    else{
+                                        descripcion = result.params.data.text.substring(6); 
+                                        $(this).closest('td').next().find('input').val(descripcion);
+                                        cargar_vencimientos($(this));
+                                    }
+                                }",
+                            ]
+                        ];
+                    },
+                    
                  ],
                  
                 [

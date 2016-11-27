@@ -28,7 +28,7 @@ use yii\helpers\ArrayHelper;
  * @property string $ME_DEPOSITO
  *
  * @property ArticGral[] $articGrals
- * @property ArticGral $monodroga
+ * @property ArticGral $articulo
  * @property Deposito $mEDEPOSITO
  * @property Labo $mECODLAB
  */

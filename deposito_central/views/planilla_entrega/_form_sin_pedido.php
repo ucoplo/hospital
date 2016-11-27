@@ -94,38 +94,59 @@ use yii\web\JsExpression;
                      [
                         'name'  => 'PR_CODART',
                         
-                        'title' => 'Cod. Medicamento',
+                        'title' => 'Código',
                         'type' => kartik\select2\Select2::classname(),
-                        'options' => [
-                            'data' => ArrayHelper::map(ArticGral::find()->all(), 'AG_CODIGO', 
-                                            function($model, $defaultValue) {
-                                                return $model['AG_CODIGO'].'-'.$model['AG_NOMBRE'];
-                                            }),
-                            'options' => ['placeholder' => ''],
-                            'pluginOptions' => [
-                                'allowClear' => false,
-                                'templateSelection' => new JsExpression('function(monodroga) { return monodroga.text.substring(0,4); }'),
-                            ],
-                            'pluginEvents' => [
+                        'options' => function($data) use ($model){
+                            $url_busqueda_articulos = \yii\helpers\Url::to(['reportes/buscar-articulos']);
+                            return 
+                            [
+                                //'data' => (!empty($data['AR_CODART']))?[ "{$data['AR_CODART']}" => "[{$data['AR_CODART']}] ".$data['descripcion']]:[],
+                                'pluginOptions' => [
+                                    'allowClear' => false,
+                                    'templateSelection' => new JsExpression('function(monodroga) { return monodroga.text.substring(0,4); }'),
+                                    'ajax' => [
+                                        'url' => $url_busqueda_articulos,
+                                        'dataType' => 'json',
+                                        'data' => new JsExpression('function(params) {
+                                            deposito_id = 0;
+                                            deposito_id = $("#planilla_entrega-pe_deposito").val();
+                                            if (deposito_id==0) {
+                                                krajeeDialog.alert("Debe seleccionar primero el depósito");
+                                                return false;
+                                            }else{
+                                                return {q:params.term,deposito:deposito_id};
+                                            }
+                                        }')
+                                    ],
+                                    
+                                    'enableEmpty' => true,
+                                    'minimumInputLength' => 1,
+                                    'language' => 'es',
+                                    'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                                    'templateResult' => new JsExpression('function(articulo) { return articulo.text; }'),
+                                    'templateSelection' => new JsExpression('function (articulo) { return articulo.id; }'),
+                                ],
+                                'pluginEvents' => [
                                 "select2:select" => "function(name) {
                                                         if (!codigo_unico($(this))==true)
                                                         {
-                                                          descripcion = name.params.data.text.substring(5); 
+                                                          descripcion = name.params.data.text.substring(6); 
                                                           $(this).closest('td').next().find('input').val(descripcion);
                                                           cargar_vencimiento($(this));
                                                           
                                                         }
                                                         else{
-                                                            krajeeDialog.alert('No puede repetirse el medicamento');
+                                                            krajeeDialog.alert('No puede repetirse el artículo');
                                                             $(this).val('').trigger('change');
                                                             $(this).closest('td').next().find('input').val('');
                                                             $(this).closest('td').next().next().find('input').val('');
                                                         }
                                                     }",
 
-                            ],
-
-                        ]
+                                ],
+                            ];
+                        },
+                      
                     ],
                     [
                         'name' => 'descripcion',
@@ -137,7 +158,7 @@ use yii\web\JsExpression;
                             'readonly' => true,
                         ],
                                     
-                        'title' => 'Descripción del medicamento',
+                        'title' => 'Descripción',
                     ],    
                     [
                         'name'  => 'PR_FECVTO',

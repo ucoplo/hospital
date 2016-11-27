@@ -60,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'PR_CODART',
                 [
                     'attribute' => 'descripcion',
-                    'value' =>    function($model){return  $model->monod->AG_NOMBRE;},     
+                    'value' =>    function($model){return  $model->articulo->AG_NOMBRE;},     
                     'label' => 'Descripción del medicamento',
                 ],   
                 'PR_FECVTO:date', 

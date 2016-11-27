@@ -10,6 +10,7 @@ use deposito_central\models\OrdenCompraSearch;
 use deposito_central\models\OrdenCompra;
 use deposito_central\models\OrdenCompra_renglones;
 use deposito_central\models\Pedido_adquisicion;
+use deposito_central\models\Pedido_adquisicion_renglones;
 use deposito_central\models\Proveedores;
 
 use deposito_central\models\Vencimientos;
@@ -28,6 +29,7 @@ use yii\data\ArrayDataProvider ;
 use yii\base\Model;
 use yii\filters\AccessControl;
 use yii\widgets\ActiveForm;
+use yii\db\Query;
 /**
  * Remito_AdquisicionController implements the CRUD actions for Remito_Adquisicion model.
  */
@@ -58,7 +60,7 @@ class Remito_adquisicionController extends Controller
                          [
                             'allow'=>true,
                             'roles'=> ['@'],
-                            'actions' => ['validate-asociar-pedido',],
+                            'actions' => ['validate-asociar-pedido','buscar-articulos',],
                             
                         ]
                     ]
@@ -316,6 +318,23 @@ class Remito_adquisicionController extends Controller
             throw new ErrorException($mensaje);
           }
 
+          if (isset($model->pedido)){
+            //decrementamos la cantidad pendiente de entrega en el pedido
+            $renglon_pedido = Pedido_adquisicion_renglones::findOne(['PE_NUM'=>$model->pedido,'PE_CODART'=>$renglon->AR_CODART]);
+
+            if (isset($renglon_pedido)){
+                $renglon_pedido->PE_CANT -=  $renglon->AR_CANTID;
+
+                if (!$renglon_pedido->save()){
+                  $mensaje = ""; 
+                  foreach ($renglon_pedido->getFirstErrors() as $key => $value) {
+                    $mensaje .= "\\n\\r $value";
+                  }
+                  throw new ErrorException($mensaje);
+                }
+            }
+          }
+
           $num_renglon++;                           
           
           //Incrementamos la cantidad en Vencimientos
@@ -546,7 +565,6 @@ class Remito_adquisicionController extends Controller
             $model->renglones = $items;
             return $this->render('create_orden_compra', [
                 'model' => $model,
-                
             ]);
         }
     }
@@ -564,6 +582,7 @@ class Remito_adquisicionController extends Controller
                       //Se guarda encabezado Remito
                     
                       $model->RA_CODOPE = Yii::$app->user->identity->LE_NUMLEGA;
+                      $model->pedido = null;
                       if ($model->save()){
                         $this->guardar_renglones($model);
                        }else{
@@ -597,8 +616,6 @@ class Remito_adquisicionController extends Controller
             else{
               return $this->render('create_adquisicion', [
                 'model' => $model,
-              
-               
             ]);
             }
         
@@ -606,20 +623,9 @@ class Remito_adquisicionController extends Controller
         } else {
             $model->RA_FECHA = date('Y-m-d');
             $model->RA_HORA = date('H:i:s');
-            // $items = [];
-            // $item = new Remito_adquisicion_renglones();
-            // $item->AR_NROREN = 1;
-            // $item->descripcion = "";
-            // array_push($items,$item);
-           
-            // $renglones= new ArrayDataProvider([
-            //     'allModels' => $items,
-            // ]);
-            // $model->renglones = $renglones;
+   
             return $this->render('create_adquisicion', [
                 'model' => $model,
-              
-               
             ]);
         }
     }
@@ -780,5 +786,47 @@ class Remito_adquisicionController extends Controller
             \Yii::$app->response->format = Response::FORMAT_JSON;
             return ActiveForm::validate($model);
         }
+    }
+    public function actionBuscarArticulos($q = null/*,$deposito = null*/) {
+        $limit = 10;
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        
+        $deposito = Yii::$app->request->get('deposito');
+        
+        $out = ['results' => ['id' => '', 'text' => '']];
+        if (!is_null($q)) {
+            $query = new Query;
+            $query->select(['AG_CODIGO as id', 'CONCAT("[",AG_CODIGO,"] ",AG_NOMBRE) AS text'])
+                ->from('artic_gral')
+                ->orderBy('AG_NOMBRE')
+                ->limit($limit);
+
+            if ($deposito != null) {
+                $query->andWhere(['=','AG_DEPOSITO', $deposito]);
+            }
+
+            // $depositos_habilitados = Yii::$app->params['depositos_central'];
+            // $query->andWhere(['IN','AG_DEPOSITO', $depositos_habilitados]);
+
+            $words = explode(' ', $q);
+            foreach ($words as $word) {
+                $query->andWhere('AG_NOMBRE LIKE "%' . $word .'%" OR AG_CODIGO LIKE "%' . $word .'%"');
+            }
+
+            //$query->orWhere(['like', 'AG_CODIGO', $q])->andWhere(['AG_DEPOSITO'=> $deposito]);
+            
+
+            $command = $query->createCommand();
+            $practicas = $command->queryAll();
+            $cantidad = $query->count();
+
+            $out['results'] = array_values($practicas);
+            if ($cantidad > $limit)
+                    array_unshift($out['results'],['id'=>null,'text'=>"Mostrando $limit de $cantidad resultados"]);
+        }
+        
+        return $out;
+    
     }
  }

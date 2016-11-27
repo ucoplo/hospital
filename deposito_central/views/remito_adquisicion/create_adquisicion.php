@@ -11,7 +11,9 @@ use yii\widgets\MaskedInput;
 use yii\web\JsExpression;
 use kartik\select2\Select2;
 use unclead\widgets\MultipleInput;
+use deposito_central\assets\Remito_adquisicionAsset;
 
+Remito_adquisicionAsset::register($this);
 
 /* @var $this yii\web\View */
 /* @var $model farmacia\models\Remito_Adquisicion */
@@ -84,86 +86,7 @@ $this->params['breadcrumbs'][] = $this->title;
 			</div>
         </div>
 
-	     <!--<div id="grid_adquisicion_renglones">
-	     	 <div class="form-group ">
-	    			<?= Html::a('Agregar Renglón','#',array('class'=>'btn btn-primary','id' => 'btn_add_renglon'));?>
-	    	</div>
-
-	    <?/*= GridView::widget([
-	        'dataProvider' => $model->renglones,
-	        'emptyText' => '',
-	        'summary'=>"",
-	        'columns' => [
-
-	            
-	            [
-	                'attribute' => 'AR_CODART',
-	                'value' => function($model){
-	                	return  Select2::widget([
-								    'name' => "Remito_Adquisicion[renglones][$model->AR_NUMRENG][AR_CODART]",
-								    'id' => "renglon$model->AR_NUMRENG",
-								    'attribute' => 'AG_CODIGO',
-
-								    'data' => ArrayHelper::map(ArticGral::find()->all(), 'AG_CODIGO', 
-								    	function($model, $defaultValue) {
-									        return $model['AG_CODIGO'].'-'.$model['AG_NOMBRE'];
-									    }),
-								    'options' => ['placeholder' => 'Seleccione...'],
-								    'pluginOptions' => [
-								        'allowClear' => false
-								    ],
-								    
-								]);
-	                	//return Html::dropDownList("renglones[$model->AR_NUMRENG][AR_CODART]",null,ArrayHelper::map(ArticGral::find()->all(), 'AG_CODIGO', 'AG_NOMBRE'));
-	                    //return Html::textInput("renglones[$model->AR_NUMRENG][AR_CODART]",$model->AR_CODART,['readonly' => 'true']);
-	                },
-	                'format' => 'raw',
-	                'label' => 'Cod. Medicamento',
-	            ],     
-	              [
-	                'attribute' => 'descripcion',
-	                'value' => function($model){
-	                    return Html::textInput("Remito_Adquisicion[renglones][$model->AR_NUMRENG][descripcion]",$model->descripcion,['readonly' => 'true','class'=> 'solo_lectura']);
-	                },
-	                'format' => 'raw',
-	                          	
-	                'label' => 'Descripción del medicamento',
-	            ],    
-	             [
-	                'attribute' => 'AR_FECVTO',
-	                'value' => function($model){
-	                	return MaskedInput::widget(['name' => "Remito_Adquisicion[renglones][$model->AR_NUMRENG][AR_FECVTO]", 'clientOptions' => ['alias' =>  'dd/mm/yyyy']]);
-	                    //return Html::textInput("renglones[$model->AR_NUMRENG][AR_FECVTO]",$model->AR_FECVTO,['readonly' => 'true']);
-	                },
-	                'format' => 'raw',
-	                'label' => 'Fecha Vto',
-	            ],    
-	              [
-	                'attribute' => 'AR_CANTID',
-	                'value' => function($model){
-	                	return MaskedInput::widget(['name' => "Remito_Adquisicion[renglones][$model->AR_NUMRENG][AR_CANTID]", 'clientOptions' => ['alias' =>  'decimal','groupSeparator' => ',', 'autoGroup' => true]]);
-	                	
-	                    //return Html::textInput("renglones[$model->AR_NUMRENG][AR_CANTID]",$model->AR_CANTID);
-	                },
-	                'format' => 'raw',
-	                'label' => 'Cantidad',
-	            ],    
-	             [
-	             	'value' => function($model){
-	                	return Html::a('<span class="glyphicon glyphicon-trash"></span>', '#',['class'=>'btn_delete_renglon']);
-	                	
-	                 
-	                },
-	                'format' => 'raw',
-	                'label' => '',
-	            ],    
-	            
-	         
-	          
-	        ],
-	    ]); */?>
-	    </div>-->
-	   
+	  	   
 	    <?= $form->field($model, 'renglones', ['horizontalCssClasses' => ['label' => 'col-md-0', 'wrapper' => 'col-md-12 col-sm-offset-0']])->widget(MultipleInput::className(), [
 		    //'limit' => 4,
 		    'addButtonPosition' => MultipleInput::POS_HEADER,
@@ -174,22 +97,55 @@ $this->params['breadcrumbs'][] = $this->title;
 		            'enableError' => true,
 		            'title' => 'Cod. Artículo',
 		            'type' => kartik\select2\Select2::classname(),
-		            'options' => [
-		                'data' => ArrayHelper::map(ArticGral::find()->all(), 'AG_CODIGO', 
-								    	function($model, $defaultValue) {
-									        return $model['AG_CODIGO'].'-'.$model['AG_NOMBRE'];
-									    }),
-					    'options' => ['placeholder' => ''],
-					    'pluginOptions' => [
-					        'allowClear' => false,
-					        'templateSelection' => new JsExpression('function(monodroga) { return monodroga.text.substring(0,4); }'),
-					    ],
-					    'pluginEvents' => [
-    						"select2:select" => "function(name) { descripcion = name.params.data.text.substring(5); 
-    															  $(this).closest('td').next().find('input').val(descripcion);}",
-						],
+		    
+		             'options' => function($data) use ($model){
+                        $deposito = $model->RA_DEPOSITO;
+                        $url_busqueda_articulos = \yii\helpers\Url::to(['remito_adquisicion/buscar-articulos']);
+                        return 
+                        [
+                            //'data' => (!empty($data['AR_CODART']))?[ "{$data['AR_CODART']}" => "[{$data['AR_CODART']}] ".$data['descripcion']]:[],
+                            'pluginOptions' => [
+						        'allowClear' => false,
+						        'templateSelection' => new JsExpression('function(monodroga) { return monodroga.text.substring(0,4); }'),
+                                'ajax' => [
+                                    'url' => $url_busqueda_articulos,
+                                    'dataType' => 'json',
+                                    'data' => new JsExpression('function(params) {
+                                            deposito_id = 0;
+                                            deposito_id = $("#remito_adquisicion-ra_deposito").val();
+                                            if (deposito_id==0) {
+                                                krajeeDialog.alert("Debe seleccionar primero el depósito");
+                                                return false;
+                                            }else{
+                                                return {q:params.term,deposito:deposito_id};
+                                            }
+                                    }')
+                                ],
+                                
+                                'enableEmpty' => true,
+                                'minimumInputLength' => 1,
+                                'language' => 'es',
+                                'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                                'templateResult' => new JsExpression('function(articulo) { return articulo.text; }'),
+                                'templateSelection' => new JsExpression('function (articulo) { return articulo.id; }'),
+                            ],
+                            'pluginEvents' => [
 
-		            ]
+                                "select2:select" => "function(result) {
+                                    
+                                    if (!codigo_unico($(this)))
+                                    {
+                                        $(this).val('').trigger('change');
+                                        krajeeDialog.alert('No puede repetirse el articulo');
+                                    }
+                                    else{
+                                    	descripcion = result.params.data.text.substring(6); 
+    		 							$(this).closest('td').next().find('input').val(descripcion);
+                                    }
+                                }",
+                            ]
+                        ];
+                    },
 		        ],
 		        [
 	                'name' => 'descripcion',

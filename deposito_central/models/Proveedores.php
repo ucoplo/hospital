@@ -71,16 +71,16 @@ class Proveedores extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getDcDevoprovs()
+    public function getDevoluciones()
     {
-        return $this->hasMany(DcDevoprov::className(), ['DD_PROVE' => 'PR_CODIGO']);
+        return $this->hasMany(Devolucion_proveedor::className(), ['DD_PROVE' => 'PR_CODIGO']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getOrdenesCompras()
+    public function getOrdenesCompra()
     {
-        return $this->hasMany(OrdenesCompra::className(), ['OC_PROVEED' => 'PR_CODIGO']);
+        return $this->hasMany(OrdenCompra::className(), ['OC_PROVEED' => 'PR_CODIGO']);
     }
 }

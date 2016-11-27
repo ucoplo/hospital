@@ -16,9 +16,12 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <p>
-        <?= Html::a('Nuevo suministro', ['seleccion_servicio'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('Nueva Planilla', ['seleccion_servicio'], ['class' => 'btn btn-success popupModal']) ?>
+
+        <?= Html::a('Nueva Planilla sin Pedido', ['create_sin_pedido'], ['class' => 'btn btn-success']) ?>
+  
     </p>
-<?php Pjax::begin(); ?>    <?= GridView::widget([
+    <?php Pjax::begin(); ?>    <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'dataProvider' => $dataProvider,
@@ -72,3 +75,23 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]); ?>
 <?php Pjax::end(); ?></div>
+<?php
+    yii\bootstrap\Modal::begin([
+        'header' => '<center><h2>Tipo de Pedidos</h2></center>',
+        'id' =>'modal',
+        'size' => 'modal-lg',
+    ]);
+    echo '<div class="row text-center">';
+    echo '<div class="col-md-6">'.Html::a('Pedidos Insumos Salas', ['seleccion_servicio'], ['class' => 'btn btn-success btn-lg'])."</div>";  
+    echo '<div class="col-md-6">'.Html::a('Pedidos de Farmacia', ['seleccion_pedido_farmacia'], ['class' => 'btn btn-success btn-lg'])."</div>";  
+    echo '</div>';
+    yii\bootstrap\Modal::end();
+
+    $this->registerJs("$(function() {
+       $('.popupModal').click(function(e) {
+         e.preventDefault();
+         $('#modal').modal('show');
+       });
+    });");
+
+?>

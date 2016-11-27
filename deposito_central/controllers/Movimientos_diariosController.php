@@ -392,4 +392,47 @@ class Movimientos_diariosController extends Controller
         return $model;
         
     }
+
+    public function actionBuscarArticulos($q = null/*,$deposito = null*/) {
+        $limit = 10;
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        
+        $deposito = Yii::$app->request->get('deposito');
+        
+        $out = ['results' => ['id' => '', 'text' => '']];
+        if (!is_null($q)) {
+            $query = new Query;
+            $query->select(['AG_CODIGO as id', 'CONCAT("[",AG_CODIGO,"] ",AG_NOMBRE) AS text'])
+                ->from('artic_gral')
+                ->orderBy('AG_NOMBRE')
+                ->limit($limit);
+
+            if ($deposito != null) {
+                $query->andWhere(['=','AG_DEPOSITO', $deposito]);
+            }
+
+            // $depositos_habilitados = Yii::$app->params['depositos_central'];
+            // $query->andWhere(['IN','AG_DEPOSITO', $depositos_habilitados]);
+
+            $words = explode(' ', $q);
+            foreach ($words as $word) {
+                $query->andWhere('AG_NOMBRE LIKE "%' . $word .'%" OR AG_CODIGO LIKE "%' . $word .'%"');
+            }
+
+            //$query->orWhere(['like', 'AG_CODIGO', $q])->andWhere(['AG_DEPOSITO'=> $deposito]);
+            
+
+            $command = $query->createCommand();
+            $practicas = $command->queryAll();
+            $cantidad = $query->count();
+
+            $out['results'] = array_values($practicas);
+            if ($cantidad > $limit)
+                    array_unshift($out['results'],['id'=>null,'text'=>"Mostrando $limit de $cantidad resultados"]);
+        }
+        
+        return $out;
+    
+    }
 }

@@ -6,6 +6,9 @@ use Yii;
 use deposito_central\models\Planilla_entrega;
 use deposito_central\models\Planilla_entregaSearch;
 use deposito_central\models\PedidoInsumosSearch;
+use deposito_central\models\PedidosReposicionFarmaciaSearch;
+use deposito_central\models\PedidosReposicionFarmacia;
+use deposito_central\models\PedidosReposicionFarmacia_renglones;
 use deposito_central\models\PedidoInsumos;
 use deposito_central\models\Planilla_entrega_renglones;
 use deposito_central\models\Vencimientos;
@@ -53,7 +56,10 @@ class Planilla_entregaController extends Controller
                      [
                         'allow'=>true,
                         'roles'=> ['@'],
-                        'actions' => ['vencimiento_vigente_codart','procesar',],
+                        'actions' => ['vencimiento_vigente_codart',
+                                      'procesar',
+                                      'iniciar_creacion_farmacia',
+                                      'seleccion_pedido_farmacia'],
                         
                     ]
                 ]
@@ -82,8 +88,20 @@ class Planilla_entregaController extends Controller
         
         $dataProvider = $searchModel->vales_servicio_listado();
 
-
         return $this->render('seleccion_servicio', [
+            'dataProvider' => $dataProvider,
+        ]);
+
+        
+    }
+
+     public function actionSeleccion_pedido_farmacia()
+    {
+        $search_pedidos_farmacia = new PedidosReposicionFarmaciaSearch();
+
+        $dataProvider = $search_pedidos_farmacia->pedidos_listado();
+
+        return $this->render('seleccion_pedido_farmacia', [
             'dataProvider' => $dataProvider,
         ]);
 
@@ -177,6 +195,67 @@ class Planilla_entregaController extends Controller
                 }
     }
 
+     public function actionIniciar_creacion_farmacia($pedido)
+    {
+      try {
+         $model = new Planilla_entrega();
+
+         $pedido_insumos = PedidosReposicionFarmacia::findOne($pedido);
+
+         $model->PE_SERSOL = $pedido_insumos->PE_SERSOL;
+         $model->PE_DEPOSITO = $pedido_insumos->PE_DEPOSITO;
+         $model->PE_FECHA = date('Y-m-d');
+         $model->PE_HORA = date('H:i:s');
+         $model->PE_CODOPE = Yii::$app->user->identity->LE_NUMLEGA; //El usuario logueado
+         $model->PE_ENFERM = $pedido_insumos->PE_SUPERV;
+         $model->PE_NUMVALE = $pedido;
+
+         $renglones = [];
+        $pedido_entregado_parcialmente = false;
+        foreach ($pedido_insumos->renglones as $key_reng_pedido => $renglon_pedido) {
+
+          $cantidad_entregada = 0;
+          foreach ($pedido_insumos->planillas_entrega as $key_planilla => $planilla) {
+            foreach ($planilla->renglones_planilla as $key_reng_planilla => $renglon_planilla) {
+              if ($renglon_planilla->PR_CODART==$renglon_pedido->PE_CODMON){
+                $cantidad_entregada += $renglon_planilla->PR_CANTID;
+                $pedido_entregado_parcialmente = true;
+              }
+            }
+          }
+          if ($cantidad_entregada<$renglon_pedido->PE_CANTPED){
+            //Verifico que el articulo ingresado en el pedido exista en el Depósito
+            if (!isset($renglon_pedido->articulo)){
+              throw new ErrorException("El artículo $renglon_pedido->PE_CODMON del pedido de Farmacia seleccionado no existe en el Deposito $renglon_pedido->PE_DEPOSITO");
+            }
+            $nuevo_renglon = new Planilla_entrega_renglones();           
+            $nuevo_renglon->PR_CODART = $renglon_pedido->PE_CODMON;
+            $nuevo_renglon->PR_CANTID = $renglon_pedido->PE_CANTPED-$cantidad_entregada;
+            $nuevo_renglon->descripcion = $renglon_pedido->articulo->AG_NOMBRE;
+            $fecha = $this->vencimiento_vigente($nuevo_renglon->PR_CODART,$renglon_pedido->PE_DEPOSITO);
+            if ($fecha)
+                $nuevo_renglon->PR_FECVTO = Yii::$app->formatter->asDate($fecha->DT_FECVEN,'php:d-m-Y');
+            
+            $renglones[] = $nuevo_renglon;
+          }
+        }
+        if ($pedido_entregado_parcialmente)
+          Yii::$app->getSession()->setFlash('exito_deposito_central', 'El Pedido seleccionado a sido parcialmente entregado.');
+
+        $model->renglones = $renglones;
+
+         return $this->render('create', [
+                'model' => $model,
+            ]);
+       }
+       catch (\Exception $e) {
+                   
+                    
+                    Yii::$app->getSession()->setFlash('error_deposito_central', $e->getMessage());
+
+                    return $this->redirect(['seleccion_pedido_farmacia']);
+                }
+    }
     //Ultima entrega de medicamento que se efectuo
     private function ultima_salida($codart,$deposito){
 
@@ -220,7 +299,7 @@ class Planilla_entregaController extends Controller
                       
             $artic_gral->AG_ULTSAL = $this->ultima_salida($renglon->PR_CODART,$renglon->PR_DEPOSITO);
 
-            if (!$artic_gral->save()){
+            if (!$artic_gral->save(false)){
               $mensaje = ""; 
               foreach ($artic_gral->getFirstErrors() as $key => $value) {
                 $mensaje .= "\\n\\r $value";
@@ -311,7 +390,7 @@ class Planilla_entregaController extends Controller
           if ($artic_gral){
               $artic_gral->AG_STACDEP -= $obj['PR_CANTID'];
               $artic_gral->AG_ULTSAL = date('Y-m-d');
-              if (!$artic_gral->save()){
+              if (!$artic_gral->save(false)){
                 $mensaje = ""; 
                 foreach ($artic_gral->getFirstErrors() as $key => $value) {
                   $mensaje .= "\\n\\r $value";
@@ -492,6 +571,7 @@ class Planilla_entregaController extends Controller
                   $movimiento_sala->MO_CODMON = $obj['PR_CODART'];
                   $movimiento_sala->MO_DEPOSITO = $model->PE_DEPOSITO;
                   $movimiento_sala->MO_CODSERV =  $model->PE_SERSOL;
+                  $movimiento_sala->MO_SUPOPE =  Yii::$app->user->identity->LE_NUMLEGA; //El usuario logueado;
                   
 
               }
@@ -715,7 +795,7 @@ class Planilla_entregaController extends Controller
               $renglones = $this->agrupar_medicamentos($model->renglones);
               
               foreach ($renglones as $key => $renglon) {
-                $renglones[$key]->descripcion = $renglon->monodroga->AG_NOMBRE;
+                $renglones[$key]->descripcion = $renglon->articulo->AG_NOMBRE;
                 $renglon->PR_FECVTO = Yii::$app->formatter->asDate($renglon->PR_FECVTO,'php:d-m-Y');
               }
 

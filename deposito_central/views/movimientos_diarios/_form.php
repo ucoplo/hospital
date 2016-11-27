@@ -59,40 +59,63 @@ use yii\web\JsExpression;
                 //             }
                 //         },
                 'columns' => [
+                    
                      [
                         'name'  => 'DM_CODART',
                         
-                        'title' => 'Cod. Medicamento',
+                        'title' => 'Artículo',
                         'type' => kartik\select2\Select2::classname(),
-                        'options' => [
-                        'data' => ArrayHelper::map($model->listaMedicamentos, 'AG_CODIGO', 
-                                            function($model, $defaultValue) {
-                                                return $model['AG_CODIGO'].'-'.$model['AG_NOMBRE'];
-                                            }),
-                            'options' => ['placeholder' => ''],
-                            'pluginOptions' => [
-                                'allowClear' => false,
-                                'templateSelection' => new JsExpression('function(monodroga) { return monodroga.text.substring(0,4); }'),
-                            ],
-                            'pluginEvents' => [
-                                "select2:select" => "function(name) {
-                                                        descripcion = name.params.data.text.substring(5); 
-                                                        $(this).closest('td').next().find('input').val(descripcion);
-                                                    }",
-                            ],
-                        ]
+                        'options' => function($data) use ($model){
+                            $deposito = $model->DM_DEPOSITO;
+                            $url_busqueda_articulos = \yii\helpers\Url::to(['pedido_adquisicion/buscar-articulos','deposito'=>$deposito]);
+                            if (isset($data['DM_CODMOV'])){
+                                $tipo = Movimientos_tipos::findOne($data['DM_CODMOV']);
+                                $habilitado = ($tipo['DM_SIGNO']>0);
+                            }
+                            else{
+                                $habilitado = true;
+                            }
+                            return 
+                            [
+                                'data' => (!empty($data['DM_CODART']))?[ "{$data['DM_CODART']}" => "[{$data['DM_CODART']}] ".$data['descripcion']]:[],
+
+                                'pluginOptions' => [
+                                    'ajax' => [
+                                        'url' => $url_busqueda_articulos,
+                                        'dataType' => 'json',
+                                        'data' => new JsExpression('function(params) {
+                                          return {q:params.term};
+                                        }')
+                                    ],
+                                    'disabled' => !$habilitado,
+                                    'enableEmpty' => true,
+                                    'minimumInputLength' => 1,
+                                    'language' => 'es',
+                                    'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+                                    'templateResult' => new JsExpression('function(articulo) { return articulo.text; }'),
+                                    'templateSelection' => new JsExpression('function (articulo) { return articulo.text; }'),
+                                ],
+                                'pluginEvents' => [
+                                    "select2:select" => "function(name) {
+                                                            descripcion = name.params.data.text.substring(6); 
+                                                            $(this).closest('td').next().find('input').val(descripcion);
+                                                        }",
+                                ],
+                            ];
+                        },
+                        
                     ],
-                    [
-                        'name' => 'descripcion',
-                        'enableError' => true,
-                        'value' => function($data) {
-                                return $data['descripcion'];
-                            },
-                        'options' => [
-                            'readonly' => true,
-                        ],
-                        'title' => 'Descripción del medicamento',
-                    ],
+                    // [
+                    //     'name' => 'descripcion',
+                    //     'enableError' => true,
+                    //     'value' => function($data) {
+                    //             return $data['descripcion'];
+                    //         },
+                    //     'options' => [
+                    //         'readonly' => true,
+                    //     ],
+                    //     'title' => 'Descripción del medicamento',
+                    // ],
                    
                     [
                         'name' => 'DM_CODMOV',
@@ -100,8 +123,13 @@ use yii\web\JsExpression;
                         'type' =>  kartik\select2\Select2::classname(),
                         
                         'options' => function($model){
-                            $tipo = Movimientos_tipos::findOne($model['DM_CODMOV']);
-                            $habilitado = ($tipo['DM_SIGNO']>0);
+                            if (isset($model['DM_CODMOV'])){
+                                $tipo = Movimientos_tipos::findOne($model['DM_CODMOV']);
+                                $habilitado = ($tipo['DM_SIGNO']>0);
+                            }
+                            else{
+                                $habilitado = true;
+                            }
                             return [
                             'data' => ArrayHelper::map(Movimientos_diarios::listaTipos($habilitado), 'DM_COD', 
                                             function($model, $defaultValue) {

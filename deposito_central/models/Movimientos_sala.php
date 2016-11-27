@@ -15,7 +15,6 @@ use Yii;
  * @property string $MO_CODMON
  * @property string $MO_CANT
  * @property string $MO_TIPMOV
- * @property string $MO_ORDEN
  * @property string $MO_SUPOPE
  *
  * @property ArticGral $mOCODMON
@@ -45,7 +44,7 @@ class Movimientos_sala extends \yii\db\ActiveRecord
             [['MO_FECHA', 'MO_HORA'], 'safe'],
             [['MO_CANT'], 'number'],
             [['MO_CODSERV'], 'string', 'max' => 3],
-            [['MO_DEPOSITO', 'MO_ORDEN'], 'string', 'max' => 2],
+            [['MO_DEPOSITO'], 'string', 'max' => 2],
             [['MO_CODMON'], 'string', 'max' => 4],
             [['MO_TIPMOV'], 'string', 'max' => 1],
             [['MO_SUPOPE'], 'string', 'max' => 6],
@@ -71,7 +70,6 @@ class Movimientos_sala extends \yii\db\ActiveRecord
             'MO_CODMON' => 'Medicamento',
             'MO_CANT' => 'Cantidad',
             'MO_TIPMOV' => 'Tipo Movimiento Sala',
-            'MO_ORDEN' => 'Ordenamiento para la ficha de ordenamiento',
             'MO_SUPOPE' => 'Dependiendo del tipo de mov Supervisor o Personal de enfermería',
         ];
     }

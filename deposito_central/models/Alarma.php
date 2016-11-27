@@ -59,7 +59,7 @@ class Alarma extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getMonodroga()
+    public function getArticulo()
     {
         return $this->hasOne(ArticGral::className(), ['AG_CODIGO' => 'AL_CODMON', 'AG_DEPOSITO' => 'AL_DEPOSITO']);
     }

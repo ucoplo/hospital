@@ -13,14 +13,14 @@ use yii\data\ActiveDataProvider;
  * @property string $PR_CANTID
  * @property string $PR_FECVTO
  *
- * @property ArticGral $monodroga
+ * @property ArticGral $articulo
  * @property Deposito $dFDEPOSITO
  * @property Devoluc $dFNRODEVOL
  */
 class Devolucion_salas_renglones extends \yii\db\ActiveRecord
 {
     public $descripcion;
-    public $codigo,$monodroga,$cantidad,$valor;
+    //public $codigo,$cantidad,$valor;
     /**
      * @inheritdoc
      */
@@ -64,7 +64,7 @@ class Devolucion_salas_renglones extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getMonod()
+    public function getArticulo()
     {
         
         return $this->hasOne(ArticGral::className(), ['AG_CODIGO' => 'PR_CODART','AG_DEPOSITO' => 'PR_DEPOSITO']);

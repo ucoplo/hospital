@@ -91,15 +91,15 @@ class Devolucion_salas extends \yii\db\ActiveRecord
            
         }
 
-        $codigos_monodrogas = [];
+        $codigos_articulos = [];
         foreach($this->$attribute as $index => $renglon) {
             $codart = $renglon['PR_CODART'];
-            if (in_array($codart, $codigos_monodrogas)) {
+            if (in_array($codart, $codigos_articulos)) {
                 $key = $attribute . '[' . $index . '][descripcion]';
                 $this->addError($key, 'El medicamento no puede repetirse');
             }
             else{
-                $codigos_monodrogas[] = $codart;
+                $codigos_articulos[] = $codart;
             }
 
         }
@@ -142,15 +142,15 @@ class Devolucion_salas extends \yii\db\ActiveRecord
             }
         }
 
-        $codigos_monodrogas = [];
+        $codigos_articulos = [];
         foreach($this->$attribute as $index => $renglon) {
             $codart = $renglon['PR_CODART'];
-            if (in_array($codart, $codigos_monodrogas)) {
+            if (in_array($codart, $codigos_articulos)) {
                 $key = $attribute . '[' . $index . '][descripcion]';
                 $this->addError($key, 'El medicamento no puede repetirse');
             }
             else{
-                $codigos_monodrogas[] = $codart;
+                $codigos_articulos[] = $codart;
             }
         }
     }

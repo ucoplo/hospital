@@ -256,6 +256,7 @@ class Devolucion_salas_sobranteController extends Controller
                 $movimiento_sala->MO_CODMON = $renglon->PR_CODART;
                 $movimiento_sala->MO_DEPOSITO = $renglon->PR_DEPOSITO;
                 $movimiento_sala->MO_CODSERV =  $model->DE_SERSOL;
+                $movimiento_sala->MO_SUPOPE =  Yii::$app->user->identity->LE_NUMLEGA; //El usuario logueado;
                
             }
 

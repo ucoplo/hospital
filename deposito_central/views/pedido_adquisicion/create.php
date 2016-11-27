@@ -6,7 +6,7 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 /* @var $model deposito_central\models\Pedido_adquisicion */
 
-$this->title = 'Nuevo Pedido de Adquisicion';
+$this->title = 'Nuevo Pedido de Adquisición';
 $this->params['breadcrumbs'][] = ['label' => 'Pedidos de Adquisición', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>

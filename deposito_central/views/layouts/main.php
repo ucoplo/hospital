@@ -105,18 +105,14 @@ AppAsset::register($this);
                 ['label' => 'Blanqueo Stock Lotes','url' => ['/movimientos_diarios/blanquear_stock'] ],
             ]],
             ['label' => 'Consultas y Reportes', 'items' => [
-                ['label' => 'Ingresos', 'items' => [
-                     ['label' => 'Por Monodroga', 'url' => ['reportes/ingreso_monodroga']],
-                ]],
-                ['label' => 'Vademecuns', 'items' => [
-                    ['label' => 'Por Medicamento comercial', 'url' => ['reportes/medicamentos']],
-                    ['label' => 'Por Monodrogas (genéricos)', 'url' => ['reportes/monodrogas']],
-                ]],
+                ['label' => 'Ingresos', 'url' => ['reportes/ingresos']],
                 ['label' => 'Cardex de artículos', 'url' => ['reportes/cardex_articulos'] ],
                 ['label' => 'Cardex por lote de Vencimiento', 'url' => ['reportes/cardex_lotes'] ],
-                ['label' => 'Stock (existencia)', 'url' => ['reportes/stock']],
+                ['label' => 'Stock (existencias)', 'url' => ['reportes/stock']],
                 ['label' => 'Reposición',  'items' => [
-                    ['label' => 'Previsión', 'url' => ['reportes/reposicion_prevision']],
+                    ['label' => 'Pedidos pendientes', 'url' => ['reportes/pedidos_pendientes']],
+                    ['label' => 'Previsión', 'url' => ['reportes/prevision']],
+                    ['label' => 'Salida Valorizada', 'url' => ['reportes/salida_valorizada']],
                 ]],
                  ['label' => 'Análisis Rotacional',  'items' => [
                     ['label' => 'ABC', 'url' =>  ['reportes/abc']],
@@ -126,45 +122,17 @@ AppAsset::register($this);
                     ['label' => 'Salida media', 'url' => ['reportes/salida_media']],
                 ]],
                 ['label' => 'Consumos',  'items' => [
-                    ['label' => 'Alarmas',  'items' => [
-                        ['label' => 'Alarmas Estáticas', 'url' => ['reportes/alarmas_estaticas']],
-                        ['label' => 'Alarmas Dinámicas', 'url' => ['reportes/alarmas_dinamicas']],
-                    ]],
-                    
-                    ['label' => 'Consumo por Monodroga', 'url' => ['reportes/consumo_por_monodroga']],
-                    ['label' => 'Consumo por Servicio y Monodroga', 'url' => ['reportes/consumo_por_servicio']],
-                    ['label' => 'Consumo por Servicio y clase', 'url' => ['reportes/consumo_por_servicio_clase']],
-                    ['label' => 'Consumo por Vales o planilla de sala con demanda insatisfecha', 'url' => ['reportes/consumo_por_vales_planillas']],
-                    ['label' => 'Stock de monodrogas fraccioandas en sala', 'url' => ['reportes/stock_monodrogas_sala']],
-                    ['label' => 'Techos', 'url' => ['reportes/techos']],
-                    ['label' => 'Consumos por paciente',  'items' => [
-                        ['label' => 'Por U.D.', 'url' => ['reportes/consumos_paciente_por_ud']],
-                        ['label' => 'Por Pacientes', 'url' => ['reportes/consumos_paciente']],
-                        ['label' => 'Por Paciente servicio con cantidad pedida', 'url' => ['reportes/consumos_paciente_servicio_cantped']],
-                        ['label' => 'Por Pacientes servicio médico U.D. y acción terapéutica', 'url' => ['reportes/consumos_paciente_servicio_ud_at']],
-                        ['label' => 'Por Pacientes Ambulatorios y Servicios', 'url' => ['reportes/consumos_paciente_ambu_servicio']],
-                        ['label' => 'Por Pacientes Ambulatorios de SMU', 'url' => ['reportes/consumos_paciente_ambu_smu']],
-                        
-                        
-                    ]],
+                    ['label' => 'Alarmas', 'url' => ['reportes/alarmas']],
+                    ['label' => 'Consumo por artículo', 'url' => ['reportes/consumo_por_articulo']],
+                    ['label' => 'Consumo por Servicio y Artículo', 'url' => ['reportes/consumo_por_servicio']],
+                    ['label' => 'Consumo por Servicio y Clase', 'url' => ['reportes/consumo_por_servicio_clase']],
                 ]],
                 ['label' => 'Pérdidas', 'url' => ['reportes/perdidas']],
                 ['label' => 'Devoluciones', 'url' => ['reportes/devoluciones']],
                 ['label' => 'Vencimientos',  'items' => [
-                    ['label' => 'Por monodrogas', 'url' => ['reportes/monodrogas_vencimientos']],
-                    ['label' => 'Monodrogas Vencidas', 'url' => ['reportes/monodrogas_vencidas']],
-                    ['label' => 'Monodrogas a vencer', 'url' => ['reportes/monodrogas_por_vencer']],
-                ]],
-                ['label' => 'Ventanillas',  'items' => [
-                    ['label' => 'Con demanda insatisfecha', 'url' => ['reportes/consumos_ventanilla_demanda']],
-                    ['label' => 'Consumo por unidad sanitaria y pacientes', 'url' => ['reportes/consumos_ventanilla_unidad']],
-                    ['label' => 'Consumos por Pacientes Ambulatorios discriminando por OOSS', 'url' => ['reportes/consumos_paciente_ambu_ooss']],
-                    ['label' => 'Consumo por Pacientes Ambulatorios valorizado', 'url' => ['reportes/consumos_paciente_ambu_valorizado']],
-                    ['label' => 'Libro de Psicofármacos', 'url' => ['reportes/libro_psicofarmacos']],
-                ]],
-                ['label' => 'Kairos',  'items' => [
-                    ['label' => 'Actualizaciones', 'url' => ['/importar_kairos']],
-                    ['label' => 'Productos', 'url' => ['/productos_kairos']],
+                    ['label' => 'Por artículo', 'url' => ['reportes/articulos_vencimientos']],
+                    ['label' => 'Artículos Vencidos', 'url' => ['reportes/articulos_vencidos']],
+                    ['label' => 'Artículos a vencer', 'url' => ['reportes/articulos_por_vencer']],
                 ]],
             ]],
             ['label' => 'Configuración',  'items' => [

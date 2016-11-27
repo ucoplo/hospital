@@ -59,7 +59,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'data' => $model->listaClases,
                 'options' => ['placeholder' => '','multiple' => true,'readonly'=>true],
                 'pluginOptions' => [
-                    'allowClear' => true
+                    'allowClear' => true,
+                    
                 ],
             ]);?>
         </div>
@@ -74,21 +75,30 @@ $this->params['breadcrumbs'][] = $this->title;
            <?= $form->field($model, 'PE_ARTHAS', ['horizontalCssClasses' => ['label' => 'col-md-6', 'wrapper' => 'col-md-6']])->textInput(['maxlength' => true,'readonly'=>true]) ?>
         </div>
         <div class="col-md-4">
-            <?= $form->field($model, 'PE_TIPO')->widget(CheckboxX::classname(), [
+            <?= $form->field($model, 'PE_ACTIVOS')->widget(CheckboxX::classname(), [
                                  'autoLabel' => false,'readonly'=>true, 'pluginOptions'=>['threeState'=>false]]); ?>
         </div>
     </div>
 
-   <div class="row">
-        
-        <div class="col-md-4">
-            <?= $form->field($model, 'PE_CLASABC')->widget(CheckboxX::classname(), [
-                                 'autoLabel' => false,'readonly'=>true, 'pluginOptions'=>['threeState'=>false]]); ?>
+     <div class="row">
+        <div class="col-md-2"> 
+             <?= $form->field($model, 'CLASE_A',['horizontalCssClasses' => ['label' => 'col-md-8', 'wrapper' => 'col-md-4']])->widget(CheckboxX::classname(), [
+                             'readonly'=>true, 'pluginOptions'=>['threeState'=>false]]); ?>
         </div>
-        <div class="col-md-4">
-            <?= $form->field($model, 'PE_DIASABC')->textInput(['maxlength' => true,'readonly'=>true]) ?>
+        <div class="col-md-2"> 
+             <?= $form->field($model, 'CLASE_B',['horizontalCssClasses' => ['label' => 'col-md-8', 'wrapper' => 'col-md-4']])->widget(CheckboxX::classname(), [
+                             'readonly'=>true, 'pluginOptions'=>['threeState'=>false]]); ?>
         </div>
-    </div>
+        <div class="col-md-2"> 
+             <?= $form->field($model, 'CLASE_C',['horizontalCssClasses' => ['label' => 'col-md-8', 'wrapper' => 'col-md-4']])->widget(CheckboxX::classname(), [
+                             'readonly'=>true, 'pluginOptions'=>['threeState'=>false]]); ?>
+        </div>
+        <div class="col-md-6">
+            <?= $form->field($model, 'PE_DIASABC',['horizontalCssClasses' => ['label' => 'col-md-9', 'wrapper' => 'col-md-3']])->textInput(['maxlength' => true,'readonly'=>true]) ?>
+        </div>
+    </div>        
+
+      
 
     <div class="row">
         <div class="col-md-4">
@@ -141,7 +151,7 @@ $this->params['breadcrumbs'][] = $this->title;
         	<?= $form->field($model, 'PE_COSTO')->textInput(['maxlength' => true,'readonly'=>true]) ?>
        </div>
     </div>
-    <?php echo $form->errorSummary($model); ?>
+    
     <?php $deposito = $model->PE_DEPOSITO;
    ?>
     <?= $form->field($model, 'renglones', ['horizontalCssClasses' => ['label' => 'col-md-0', 'wrapper' => 'col-md-12 col-sm-offset-0']])->widget(MultipleInput::className(), [
@@ -196,8 +206,15 @@ $this->params['breadcrumbs'][] = $this->title;
                                     'url' => $url_busqueda_articulos,
                                     'dataType' => 'json',
                                     'data' => new JsExpression('function(params) {
-                                      return {q:params.term};
-                                    }')
+                                                deposito_id = 0;
+                                                deposito_id = $("#pedido_adquisicion-pe_deposito").val();
+                                                if (deposito_id==0) {
+                                                    krajeeDialog.alert("Debe seleccionar primero el depósito");
+                                                    return false;
+                                                }else{
+                                                    return {q:params.term,deposito:deposito_id};
+                                                }
+                                        }')
                                 ],
                                 'disabled' => true,
                                 'enableEmpty' => true,
@@ -415,11 +432,17 @@ $this->params['breadcrumbs'][] = $this->title;
             ]
          ])->label(false);
         ?>
-    <div class="form-group">
-        <?= Html::submitButton('Guardar Pedido', ['class'=>'btn btn-success']) ?>
-        
-    </div>
+        <div class="row">
+            <div class="col-md-6 text-left">
+                <?= Html::a('Volver', ['create'], ['class' => 'btn btn-danger']) ?>
+            </div>
+            <div class="col-md-6 text-right">
+                <?= Html::submitButton('Guardar Pedido', ['class'=>'btn btn-success','id' => 'btnguardar',]) ?>
+            </div>
+        </div>
     <?= $form->field($model, 'PE_HORA')->hiddenInput()->label(false);?>
+    <?= $form->field($model, 'PE_CLASABC')->hiddenInput()->label(false);?>
+
 
     <?php ActiveForm::end(); ?>
 
